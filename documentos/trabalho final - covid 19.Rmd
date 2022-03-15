@@ -39,12 +39,12 @@ if (!require(readxl)) {
   library(readxl)
 }
 
-df.mortes <- read_excel("./dados2/covid_19_bauru_mortes.xlsx", 
+df.mortes <- read_excel("../dados2/covid_19_bauru_mortes.xlsx", 
                         col_types = c("date", "text", "numeric",
                                       "date","text", "text",
                                       "date", "numeric"))
 
-df.geral <- read_excel("./dados/covid_19_bauru_casos_geral.xlsx")
+df.geral <- read_excel("../dados2/covid_19_bauru_casos_geral.xlsx")
 ```
 
 # 3. Análise Exploratória de Dados 
