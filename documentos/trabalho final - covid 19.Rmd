@@ -1,0 +1,111 @@
+---
+title: "Trabalho Final - Casos de COVID-19 em Bauru"
+author: "Jessica Balbino Duarte"
+date: '2022-03-14'
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+## setting working directory
+
+```
+
+# 1. Introdução
+
+A Covid-19 é uma infecção respiratória aguda causada pelo coronavírus SARS-CoV-2, potencialmente grave, de elevada transmissibilidade e de distribuição global.
+
+O SARS-CoV-2 é um betacoronavírus descoberto em amostras de lavado broncoalveolar obtidas de pacientes com pneumonia de causa desconhecida na cidade de Wuhan, província de Hubei, China, em dezembro de 2019. Pertence ao subgênero Sarbecovírus da família Coronaviridae e é o sétimo coronavírus conhecido a infectar seres humanos.
+
+# 2. Objetivo
+
+O objetivo deste relatório é proporcionar uma Análise Exploratória de Dados sobre como a pandemia de Coronavirus (Covid-19) afeta a cidade de Bauru, situada no interior do Estado de São Paulo, no Brasil.
+
+Os dados coletados foram publicados no jornal local usando dados do sistema municipal de saúde.
+
+```{r ler-arquivos, echo=FALSE}
+# Pacote tydyverse: é um pacote guarda-chuva que consolida uma série de ferramentas que fazem parte do ciclo da ciência de dados.
+if (!require(tidyverse)) {
+  install.packages("tidyverse")
+  library(tidyverse)
+}
+
+#O pacote readxl facilita a extração de dados do Excel.
+#Não possui dependências externas sendo fácil de instalar e usar em todos os sistemas operacionais.
+# readxl é parte do pacote tidyverse, um ecossistema de pacotes projetado com APIs básicos e uma filosofia compartilhada.
+if (!require(readxl)) {
+  install.packages("readxl")
+  library(readxl)
+}
+
+# Importando a planilha no R.
+# Utilizando a última versão (em 13/03/2022) dos dados contidos no Moodle.
+# Foram realizadas "limpezas" nas variáveis que continham erros (data wrangling) 
+df.mortes <- read_excel("./dados/covid_19_bauru_mortes.xlsx", 
+                        col_types = c("date", "text", "numeric", "date","text","text", "date", "numeric"))
+df.geral <- read_excel("./dados/covid_19_bauru_casos_geral.xlsx")
+
+```
+
+# 3. Análise Exploratória de Dados 
+
+No gráfico da Figura 1, temos Mortes por Covid-19 em Bauru (Distribuição por idade).
+
+```{r hospitalizacao, echo=F}
+temp.hosp <- df.mortes$tipo_hosp[!is.na(df.mortes$tipo_hosp)]
+pct.hosp = round(unname(table(temp.hosp)) / sum(unname(table(temp.hosp)))*100,0)
+pct.hosp = paste(pct.hosp, "%")
+```
+
+Com em relação ao tipo de hospitalização, nota-se pelo gráfico da Figura 2 que o número de óbitos da pandemia são relativamente similares nos dois tipos de hospitalização, ou seja, pública e privada. 
+
+```{r hospitalizacao_1, echo=F}
+
+graph.hosp<- barplot(table(temp.hosp), main = "Figura 2. Tipo de Hospitalização",
+        ylab = "Número de Óbitos", ylim = c(0,sum(unname(table(temp.hosp)))),
+        #legend.text = pct.sexo,
+        names.arg = c("Privado", "Público"))
+text(x = graph.hosp, y = table(temp.hosp), label = pct.hosp, pos = 3, cex = 1.25, col = "red")
+axis(1, at=graph.hosp, labels=table(temp.hosp), tick=F, las=1, line=-6.5, cex.axis=1.25)
+
+```
+
+Sobre a permanência hospitalar, a Figura 3 apresenta uma ampla faixa de número de dias de permanência hospitalar daqueles que chegaram à óbito.
+
+```{r, permanencia, echo=FALSE}
+# Permanencia hospitalar
+# Usando lubridate
+
+if (!require(lubridate)) {
+  install.packages("lubridate")
+  library(lubridate)
+}
+# Calculando o tempo de permanecia:
+th <- c()
+i <- 1
+j <- 0
+while (i <= nrow(df.mortes)) {
+  if(!is.na(df.mortes$inicio_sintoma[i]) && !is.na(df.mortes$data_obito[i])) {
+    j = j + 1
+    th[j] = ymd_hms(df.mortes$data_obito[i], truncated = 3) - ymd_hms(df.mortes$inicio_sintoma[i], truncated = 3)
+    }
+  i = i + 1
+}
+# Verificando a array numérica
+internacao <- table(th)
+limite_y = max((unname(internacao))) + 7
+graph.inter<- barplot(internacao, main = "Figura 3. Óbitos por tempo de permanencia hospitalar",
+                      ylab = "Número de Óbitos Ocorridos", ylim = c(0,limite_y),
+                      xlab = "Número de dias de internação")
+```
+
+Uma análise apresentada no gráfico da Figura 4 mostra que o número dos óbitos sofreu um grande avanço nos períodos mais críticos da pandemia, assim como no Brasil.
+
+```{r, periodo_variacao, echo=FALSE}
+# Variação Periódica de óbitos
+plot(df.mortes$data_obito, main = "Figura 4. Variação Periódica de óbitos", 
+     xlab = "Óbitos ocorridos", ylab = "Período/datas")
+```
