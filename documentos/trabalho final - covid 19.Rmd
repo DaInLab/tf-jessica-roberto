@@ -3,9 +3,9 @@ title: "Trabalho Final - Casos de COVID-19 em Bauru"
 author: "Jessica Balbino Duarte"
 date: '2022-03-14'
 output:
-  html_document: default
   word_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
